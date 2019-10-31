@@ -78,7 +78,7 @@ $app->singleton(
 
 $app->configure('amqp');
 $app->register(Bschmitt\Amqp\LumenServiceProvider::class);
-// $app->register(App\Providers\AppServiceProvider::class);
+// $app->register(App\Providers\RabbitServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 
@@ -92,6 +92,8 @@ $app->register(Bschmitt\Amqp\LumenServiceProvider::class);
 | can respond to, as well as the controllers that may handle them.
 |
 */
+$app->withFacades();
+class_alias(\Illuminate\Support\Facades\App::class, 'App');
 
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
