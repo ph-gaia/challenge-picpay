@@ -1,0 +1,56 @@
+version: "3"
+services:
+  # Server messaging broker
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbit1
+    ports: 
+      - "15672:15672" # web ui
+      - "5672:5672"   # broker server
+    volumes:
+      - "./rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config"
+      - "./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json"
+    volumes:
+      - $PWD/storage/rabbitmq:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_ERLANG_COOKIE="broker-picpay"
+      - RABBITMQ_NODENAME=rabbit1
+
+  # Web service layer
+  php-apache:
+    container_name: challenge-apache-picpay
+    build:
+      context: './php/'
+    volumes:
+      - ./app:/var/www/html
+    ports:
+      - "4000:80"
+    depends_on:
+      - mysql
+    links:
+      - mysql
+
+  # Data persistence service layer
+  mysql:
+    image: mysql:5.7
+    container_name: challenge-mysql-picpay
+    volumes:
+      - "db_data:/var/lib/mysql"
+      - "./mysql/initial_data:/docker-entrypoint-initdb.d"
+    ports:
+      - "9090:3306"
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=challenge_picpay
+      - MYSQL_PASSWORD=webapp
+
+  # Server smtp fake
+  mailhog:
+    image: mailhog/mailhog
+    ports: 
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
+
+volumes:
+  db_data:
