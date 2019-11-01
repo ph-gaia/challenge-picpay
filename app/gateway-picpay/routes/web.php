@@ -17,8 +17,6 @@ $router->get('/', function () use ($router) {
 
 $router->group(['prefix' => 'api', 'middleware' => ['cors']], function () use ($router) {
 
-    $router->get('rabbitmq', ['uses' => 'TransactionsController@sendBroker']);
-
     $router->post('login',  ['uses' => 'UsersController@login']);
 
     $router->post('transactions', ['uses' => 'TransactionsController@create']);

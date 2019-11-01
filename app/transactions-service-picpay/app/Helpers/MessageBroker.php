@@ -161,7 +161,6 @@ class MessageBroker
         }
 
         $this->closeConnection();
-        Log::info(json_encode($this->response));
 
         return $this->response;
     }
@@ -220,6 +219,8 @@ class MessageBroker
     {
         $credentials = json_decode($req->body);
         $authResult = $this->auth($credentials);
+
+        Log::info(json_encode($authResult));
 
         $msg = new AMQPMessage(
             json_encode($authResult),
