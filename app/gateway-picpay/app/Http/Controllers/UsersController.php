@@ -16,7 +16,19 @@ class UsersController extends Controller
      */
     public function findByNameOrUsername(Request $request)
     {
-        $query = $request->get('q');
+        $rabbit = new MessageBroker();
+
+        $data = [
+            "query" => $request->get('q'),
+        ];
+
+        if (!$data['query']) {
+            $result = $rabbit->SendAndListen("users.findall", []);
+        } else {
+            $result = $rabbit->SendAndListen("users.findname", $data);
+        }
+
+        return response($result)->header('Content-Type', 'application/json');
     }
 
     /**
@@ -25,9 +37,14 @@ class UsersController extends Controller
      */
     public function findById(int $id)
     {
-        //$result = Users::find($id);
+        $data = [
+            "query" => $id,
+        ];
 
+        $rabbit = new MessageBroker();
+        $result = $rabbit->SendAndListen("users.find", $data);
 
+        return response($result)->header('Content-Type', 'application/json');
     }
 
     /**
@@ -35,7 +52,25 @@ class UsersController extends Controller
      * @return Response
      */
     public function create(Request $request)
-    { }
+    {
+        $data = [
+            "name" => $request->get('name'),
+            "cpf" => $request->get('cpf'),
+            "email" => $request->get('email'),
+            "phone" => $request->get('phone'),
+            "typeAccount" => $request->get('typeAccount'),
+            "username" => $request->get('username'),
+            "password" => $request->get('password'),
+            "socialName" => $request->get('socialName'),
+            "fantasyName" => $request->get('fantasyName'),
+            "cnpj" => $request->get('cnpj')
+        ];
+
+        $rabbit = new MessageBroker();
+        $result = $rabbit->SendAndListen("users.register", $data);
+
+        return response($result)->header('Content-Type', 'application/json');
+    }
 
     /**
      * @param Request $request
@@ -43,14 +78,42 @@ class UsersController extends Controller
      * @return Response
      */
     public function update(Request $request, int $id)
-    { }
+    {
+        $data = [
+            "id" => $id,
+            "name" => $request->get('name'),
+            "cpf" => $request->get('cpf'),
+            "email" => $request->get('email'),
+            "phone" => $request->get('phone'),
+            "typeAccount" => $request->get('typeAccount'),
+            "username" => $request->get('username'),
+            "password" => $request->get('password'),
+            "socialName" => $request->get('socialName'),
+            "fantasyName" => $request->get('fantasyName'),
+            "cnpj" => $request->get('cnpj')
+        ];
+
+        $rabbit = new MessageBroker();
+        $result = $rabbit->SendAndListen("users.update", $data);
+
+        return response($result)->header('Content-Type', 'application/json');
+    }
 
     /**     
      * @param $id object identifier
      * @return Response
      */
     public function destroy($id)
-    { }
+    {
+        $data = [
+            "query" => $id
+        ];
+
+        $rabbit = new MessageBroker();
+        $result = $rabbit->SendAndListen("users.delete", $data);
+
+        return response($result)->header('Content-Type', 'application/json');
+    }
 
     /**
      * @param Request $request
@@ -58,14 +121,13 @@ class UsersController extends Controller
      */
     public function login(Request $request)
     {
-        $rabbitmq = new MessageBroker();
-
         $data = (object) $request->all() ?: [];
         $data = [
             "username" => $data->username,
             "password" => $data->password
         ];
 
-        return $rabbitmq->SendAndListen("auth", $data);
+        $rabbitmq = new MessageBroker();
+        return $rabbitmq->SendAndListen("auth", $data)->header('Content-Type', 'application/json');
     }
 }

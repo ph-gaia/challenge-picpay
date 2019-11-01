@@ -46,23 +46,17 @@ class Users extends Model
             ->get();
     }
 
-    /**
-     * @param Request $request
-     * @return Response
-     */
-    public function register(Request $request)
+    public function register($data)
     {
-        $data = (object) $request->all();
-
         if (
             !FunctionsModel::inputValidate($data, 'users_schema.json') ||
             !FunctionsModel::inputValidate($data, 'auth_schema.json')
         ) {
-            return response([
+            return [
                 "message" => "There are wrong fields in submission",
                 "status" => "error",
                 "error" => Json::getValidateErrors()
-            ], 400);
+            ];
         }
 
         $duplicate = self::notDuplicate($data);
@@ -87,16 +81,17 @@ class Users extends Model
                 self::insertSeller($data, $result->id);
             }
 
-            return response([
+            return [
                 "message" => "Registry created successfully",
                 "status" => "success",
                 "data" => $result
-            ], 201);
+            ];
         } catch (\Exception $ex) {
-            return response([
+            return [
                 "message" => $ex->getMessage(),
-                "status" => "warning"
-            ], 400);
+                "status" => "warning",
+                "data" => []
+            ];
         }
     }
 
@@ -140,22 +135,22 @@ class Users extends Model
         $data = (object) $request->all();
 
         if (!FunctionsModel::inputValidate($data, 'users_schema.json')) {
-            return response([
+            return [
                 "message" => "There are wrong fields in submission",
                 "status" => "error",
                 "error" => Json::getValidateErrors()
-            ], 400);
+            ];
         }
 
         try {
             $user = self::find($id);
 
             if (!$user) {
-                return response([
+                return [
                     "message" => "User not found",
                     "status" => "error",
                     "data" => []
-                ], 400);
+                ];
             }
 
             $user->full_name = $data->name;
@@ -165,16 +160,16 @@ class Users extends Model
 
             $user->save();
 
-            return response([
+            return [
                 "message" => "Registry updated successfully",
                 "status" => "success",
                 "data" => $user
-            ], 200);
+            ];
         } catch (\Exception $ex) {
-            return response([
+            return [
                 "message" => $ex->getMessage(),
                 "status" => "error"
-            ], 400);
+            ];
         }
     }
 
@@ -226,18 +221,18 @@ class Users extends Model
     {
         $result = self::where('cpf', $data->cpf)->first();
         if ($result) {
-            return response([
+            return [
                 "message" => "The reported CPF has already been registered",
                 "status" => "warning"
-            ], 400);
+            ];
         }
 
         $result = self::where('email', $data->email)->first();
         if ($result) {
-            return response([
+            return [
                 "message" => "The reported email has already been registered",
                 "status" => "warning"
-            ], 400);
+            ];
         }
     }
 }

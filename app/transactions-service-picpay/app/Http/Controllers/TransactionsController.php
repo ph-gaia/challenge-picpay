@@ -108,7 +108,7 @@ class TransactionsController extends Controller
             ];
         }
 
-        //$this->registerTransactions($object);
+        $this->registerTransactions($object);
 
         return [
             "status" => "Authorized Transaction",

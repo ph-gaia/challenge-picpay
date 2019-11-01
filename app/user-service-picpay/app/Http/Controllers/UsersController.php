@@ -3,107 +3,331 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Message\AMQPMessage;
+use Illuminate\Support\Facades\Log;
 use App\Models\Users;
-use Illuminate\Http\Request;
 
 class UsersController extends Controller
 {
 
-    /**
-     * @param Request $request
-     * @return Response
-     */
-    public function findByNameOrUsername(Request $request)
-    {
-        $query = $request->get('q');
-        $result = Users::findByNameOrUsername($query);
+    private $connection;
+    private $channel;
 
-        if (count($result) == 0) {
-            return response([
-                "status" => "warning",
-                "message" => "No records found",
-                "data" => []
-            ], 400);
+    private $host = "chimpanzee.rmq.cloudamqp.com";
+    private $port = 5672;
+    private $user = "ldqoqigt";
+    private $password = "sQcB6mPNv0qsLdDQg4lQF7U3LL9TnI0K";
+    private $vhost = "ldqoqigt";
+    
+
+    public function init()
+    {
+        $this->listenAndSend("users.findname", "findByNameOrUsername");
+        $this->listenAndSend("users.findall", "findAll");
+        $this->listenAndSend("users.find", "findById");
+        $this->listenAndSend("users.register", "create");
+        $this->listenAndSend("users.update", "update");
+        $this->listenAndSend("users.delete", "destroy");
+        // $this->listenAndSend("auth", "login");
+    }
+
+    /**
+     * open connection and channel
+     */
+    private function connect()
+    {
+        try {
+            $this->connection = new AMQPStreamConnection($this->host, $this->port, $this->user, $this->password, $this->vhost);
+            $this->channel = $this->connection->channel();
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+        }
+    }
+
+    /**
+     * close connection and channel
+     */
+    private function closeConnection()
+    {
+        $this->channel->close();
+        $this->connection->close();
+    }
+
+    private function listenAndSend($queue, $callback)
+    {
+        $this->connect();
+
+        $this->channel->queue_declare(
+            $queue,         #queue 
+            false,          #passive
+            false,          #durable
+            false,          #exclusive
+            false           #autodelete
+        );
+
+        $this->channel->basic_qos(
+            null,   #prefetch size
+            1,      #prefetch count
+            null    #global
+        );
+
+        $this->channel->basic_consume(
+            $queue,                     #queue
+            '',                         #consumer tag
+            false,                      #no local
+            false,                      #no ack
+            false,                      #exclusive
+            false,                      #no wait
+            array($this, $callback)     #callback
+        );
+
+        while (count($this->channel->callbacks)) {
+            $this->channel->wait();
         }
 
-        return response([
+        $this->closeConnection();
+    }
+
+    /**
+     * Executes when a message is received.
+     *
+     * @param AMQPMessage $req
+     */
+    public function findAll(AMQPMessage $req)
+    {
+        $result = Users::all();
+
+        if (count($result) == 0) {
+            $response = [
+                "status" => "error",
+                "message" => "User not found",
+                "data" => []
+            ];
+        }
+
+        $response = [
             "status" => "success",
             "message" => "",
             "data" => $result
-        ], 200);
+        ];
+
+        $msg = new AMQPMessage(
+            json_encode($response),
+            array('correlation_id' => $req->get('correlation_id'))
+        );
+
+        $req->delivery_info['channel']->basic_publish(
+            $msg,                   #message
+            '',                     #exchange
+            $req->get('reply_to')   #routing key
+        );
+
+        $req->delivery_info['channel']->basic_ack(
+            $req->delivery_info['delivery_tag']
+        );
     }
 
     /**
-     * @param $id object identifier
-     * @return Response
+     * Executes when a message is received.
+     *
+     * @param AMQPMessage $req
      */
-    public function findById(int $id)
+    public function findByNameOrUsername(AMQPMessage $req)
     {
-        $result = Users::find($id);
+        $data = json_decode($req->body);
+        $result = Users::findByNameOrUsername($data->query);
 
-        if (!$result) {
-            return response([
-                "status" => "error",
-                "message" => "User not found",
+        if (count($result) == 0) {
+            $response = [
+                "status" => "warning",
+                "message" => "No records found",
                 "data" => []
-            ], 400);
+            ];
         }
 
-        return response([
-            "status" => "succcess",
+        $response = [
+            "status" => "success",
             "message" => "",
             "data" => $result
-        ], 200);
+        ];
+
+        $msg = new AMQPMessage(
+            json_encode($response),
+            array('correlation_id' => $req->get('correlation_id'))  #options
+        );
+
+        $req->delivery_info['channel']->basic_publish(
+            $msg,                   #message
+            '',                     #exchange
+            $req->get('reply_to')   #routing key
+        );
+
+        $req->delivery_info['channel']->basic_ack(
+            $req->delivery_info['delivery_tag']
+        );
     }
 
     /**
-     * @param Request $request
-     * @return Response
+     * Executes when a message is received.
+     *
+     * @param AMQPMessage $req
      */
-    public function create(Request $request)
+    public function findById(AMQPMessage $req)
     {
-        $model = new Users();
-        return $model->register($request);
+        $data = json_decode($req->body);
+        $result = Users::find($data->query);
+
+        if (count($result) == 0) {
+            $response = [
+                "status" => "error",
+                "message" => "User not found",
+                "data" => []
+            ];
+        }
+
+        $response = [
+            "status" => "success",
+            "message" => "",
+            "data" => $result
+        ];
+
+        $msg = new AMQPMessage(
+            json_encode($response),
+            array('correlation_id' => $req->get('correlation_id'))
+        );
+
+        $req->delivery_info['channel']->basic_publish(
+            $msg,                   #message
+            '',                     #exchange
+            $req->get('reply_to')   #routing key
+        );
+
+        $req->delivery_info['channel']->basic_ack(
+            $req->delivery_info['delivery_tag']
+        );
     }
 
     /**
-     * @param Request $request
-     * @param $id object identifier
-     * @return Response
+     * Executes when a message is received.
+     *
+     * @param AMQPMessage $req
      */
-    public function update(Request $request, int $id)
+    public function create(AMQPMessage $req)
     {
+        $data = json_decode($req->body);
         $model = new Users();
-        return $model->edit($request, $id);
+        $response = $model->register($data);
+
+        $msg = new AMQPMessage(
+            json_encode($response),
+            array('correlation_id' => $req->get('correlation_id'))
+        );
+
+        $req->delivery_info['channel']->basic_publish(
+            $msg,                   #message
+            '',                     #exchange
+            $req->get('reply_to')   #routing key
+        );
+
+        $req->delivery_info['channel']->basic_ack(
+            $req->delivery_info['delivery_tag']
+        );
     }
 
-    /**     
-     * @param $id object identifier
-     * @return Response
+    /**
+     * Executes when a message is received.
+     *
+     * @param AMQPMessage $req
      */
-    public function destroy($id)
+    public function update(AMQPMessage $req)
     {
-        $user = Users::find($id);
+        $data = json_decode($req->body);
+        $model = new Users();
+        $response = $model->edit($data, $data->id);
+
+        $msg = new AMQPMessage(
+            json_encode($response),
+            array('correlation_id' => $req->get('correlation_id'))
+        );
+
+        $req->delivery_info['channel']->basic_publish(
+            $msg,                   #message
+            '',                     #exchange
+            $req->get('reply_to')   #routing key
+        );
+
+        $req->delivery_info['channel']->basic_ack(
+            $req->delivery_info['delivery_tag']
+        );
+    }
+
+    /**
+     * Executes when a message is received.
+     *
+     * @param AMQPMessage $req
+     */
+    public function destroy(AMQPMessage $req)
+    {
+        $data = json_decode($req->body);
+        $user = Users::find($data->query);
 
         if (!$user) {
-            return response([
+            $response = [
                 "message" => "User not found",
                 "status" => "error",
                 "data" => []
-            ], 400);
+            ];
         }
 
         $user->delete();
 
-        return response([
+        return $response = [
             "status" => "success",
             "message" => "",
             "data" => []
-        ], 204);
+        ];
+
+        $msg = new AMQPMessage(
+            json_encode($response),
+            array('correlation_id' => $req->get('correlation_id'))
+        );
+
+        $req->delivery_info['channel']->basic_publish(
+            $msg,                   #message
+            '',                     #exchange
+            $req->get('reply_to')   #routing key
+        );
+
+        $req->delivery_info['channel']->basic_ack(
+            $req->delivery_info['delivery_tag']
+        );
     }
 
-    public function login()
+    /**
+     * Executes when a message is received.
+     *
+     * @param AMQPMessage $req
+     */
+    public function login(AMQPMessage $req)
     {
-        
+        $data = json_decode($req->body);
+        $model = new Users();
+        $response = $model->login($data->username, $data->password);
+
+        $msg = new AMQPMessage(
+            json_encode($response),
+            array('correlation_id' => $req->get('correlation_id'))
+        );
+
+        $req->delivery_info['channel']->basic_publish(
+            $msg,                   #message
+            '',                     #exchange
+            $req->get('reply_to')   #routing key
+        );
+
+        $req->delivery_info['channel']->basic_ack(
+            $req->delivery_info['delivery_tag']
+        );
     }
 }

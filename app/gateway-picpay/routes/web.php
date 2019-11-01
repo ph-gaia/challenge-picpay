@@ -20,16 +20,14 @@ $router->group(['prefix' => 'api', 'middleware' => ['cors']], function () use ($
     $router->post('login',  ['uses' => 'UsersController@login']);
 
     $router->post('transactions', ['uses' => 'TransactionsController@create']);
-});
-
-$router->group(['prefix' => 'api', 'middleware' => ['cors', 'auth']], function () use ($router) {
-    $router->get('users',  ['uses' => 'UsersController@findByNameOrUsername']);
 
     $router->get('users/{id}', ['uses' => 'UsersController@findById']);
 
+    $router->get('users',  ['uses' => 'UsersController@findByNameOrUsername']);
+
     $router->post('users', ['uses' => 'UsersController@create']);
 
-    $router->put('users', ['uses' => 'UsersController@update']);
+    $router->put('users/{id}', ['uses' => 'UsersController@update']);
 
     $router->delete('users/{id}', ['uses' => 'UsersController@destroy']);
 });
