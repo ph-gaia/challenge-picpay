@@ -19,17 +19,17 @@ class TransactionsController extends Controller
     private $password = "sQcB6mPNv0qsLdDQg4lQF7U3LL9TnI0K";
     private $vhost = "ldqoqigt";
 
-    private function connect()
+    public function connect()
     {
         try {
             $this->connection = new AMQPStreamConnection($this->host, $this->port, $this->user, $this->password, $this->vhost);
             $this->channel = $this->connection->channel();
         } catch (\Exception $e) {
-            echo $e->getMessage();
+            Log::error($e->getMessage());
         }
     }
 
-    private function closeConnection()
+    public function closeConnection()
     {
         $this->channel->close();
         $this->connection->close();
@@ -108,7 +108,7 @@ class TransactionsController extends Controller
             ];
         }
 
-        $this->registerTransactions($object);
+        //$this->registerTransactions($object);
 
         return [
             "status" => "Authorized Transaction",
@@ -126,11 +126,11 @@ class TransactionsController extends Controller
 
     private function registerTransactions($object)
     {
-        Transactions::create([
-            "payee_id" => $object->payee,
-            "payer_id" => $object->payer,
-            "transaction_date" => $object->transactionDate,
-            "value" => $object->value
-        ]);
+        $model = new Transactions();
+        $model->payee_id = $object->payee;
+        $model->payer_id = $object->payer;
+        $model->transaction_date = $object->transactionDate;
+        $model->value = $object->value;
+        $model->save();
     }
 }
