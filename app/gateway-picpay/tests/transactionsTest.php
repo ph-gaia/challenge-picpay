@@ -1,6 +1,6 @@
 <?php
 
-class TransactionsTest extends Laravel\Lumen\Testing\TestCase
+abstract class transactionsTest extends Laravel\Lumen\Testing\TestCase
 {
 
     public function test_can_create_transactions()

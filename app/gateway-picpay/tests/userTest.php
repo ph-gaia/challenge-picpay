@@ -1,6 +1,6 @@
 <?php
 
-class UserTest extends Laravel\Lumen\Testing\TestCase
+abstract class userTest extends Laravel\Lumen\Testing\TestCase
 {
 
     public function test_can_get_users()
