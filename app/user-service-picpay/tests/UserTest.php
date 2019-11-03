@@ -34,5 +34,4 @@ abstract class UserTest extends Laravel\Lumen\Testing\TestCase
         $this->seeInDatabase('authentication', ['users_id' => $user->id, 'username' => 'phenrique']);
         $this->seeInDatabase('seller', ['users_id' => $user->id, 'cnpj' => '39609552000137']);
     }
-
 }

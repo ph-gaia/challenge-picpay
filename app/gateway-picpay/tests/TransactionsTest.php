@@ -14,7 +14,7 @@ class TransactionsTest extends Laravel\Lumen\Testing\TestCase
 
         $response = $this->post('/transaction', $data);
 
-        $response->assertStatus(200);
+        $response->assertResponseStatus(200);
     }
 
     public function test_can_not_create_transactions()
@@ -28,6 +28,6 @@ class TransactionsTest extends Laravel\Lumen\Testing\TestCase
 
         $response = $this->post('/transaction', $data);
 
-        $response->assertStatus(400);
+        $response->assertResponseStatus(400);
     }
 }

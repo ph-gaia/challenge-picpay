@@ -3,6 +3,15 @@
 class UserTest extends Laravel\Lumen\Testing\TestCase
 {
 
+    public function test_can_get_users()
+    {
+        $response = $this->get('/api/users');
+        $response->assertResponseStatus(200)
+            ->assertJsonStructure([
+                'data' => ['full_name', 'cpf', 'phone_number', 'email', 'account_type']
+            ]);
+    }
+
     public function test_can_create_users()
     {
         $data = [
@@ -17,7 +26,7 @@ class UserTest extends Laravel\Lumen\Testing\TestCase
 
         $response = $this->post('/api/users', $data);
 
-        $response->assertStatus(201);
+        $response->assertResponseStatus(201);
     }
 
     public function test_can_update_users()
@@ -30,13 +39,13 @@ class UserTest extends Laravel\Lumen\Testing\TestCase
             'email' => 'phcgaia11@yahoo.com.br',
         ];
         $this->put('/api/users/' . $user->id, $data)
-            ->assertStatus(200);
+            ->assertResponseStatus(200);
     }
 
     public function test_can_delete_users()
     {
         $user = factory(Users::class)->create();
         $this->delete('/api/users/' . $user->id)
-            ->assertStatus(204);
+            ->assertResponseStatus(204);
     }
 }
