@@ -73,9 +73,8 @@ Esse comando irá executar todos os arquivos de migração da aplicação e toda
 ``` curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://SEU-IP:4000/transactions-service-picpay/public/api/transaction ```
 
 #### Utilização
-[Rotas Usuários]
+[Rotas da aplicação](app/gateway-picpay/readme.md)
 
-[Rotas Transações]
 
 #### Créditos
 Esta aplicação foi desenvolvida por [Paulo Henrique Coelho Gaia](mailto:phcgaia11@yahoo.com.br).
