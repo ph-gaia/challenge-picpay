@@ -47,14 +47,15 @@ $ cd ~/challenge-picpay
 ```
 2. Para testar a solução, utilize o comando ``` docker-composer up ```. A API estará mapeada para a porta ``` 4000 ``` do seu host local
 
-3. Configuração do Banco de Dados
-O SGDB usado é o `MySQL`, e para que o sistema possa usá-lo, é necessário alterar algumas entradas no arquivo `.env`, de acordo com as suas credenciais de acesso.
-O valor que deve ser alterado é `DB_HOST`. Você deve colocar o seu endereço IP.
+3. Configuração do Banco de Dados e requisições entre os serviços:
+O SGDB usado é o `MySQL`, e para que os sistema possam usá-lo, é necessário alterar algumas entradas no arquivo `.env`, de acordo com as suas credenciais de acesso.
+O valor que deve ser alterado é `DB_HOST`. Você deve colocar o seu endereço IP, **em todos os serviços**
  - DB_HOST=127.0.0.1
  - DB_PORT=3306
  - DB_DATABASE=challenge_veus
  - DB_USERNAME=root
  - DB_PASSWORD=root
+Você deve também acessar o arquivo /app/Config/Configuration.php e atualizar o endereço ip na constante **BASE_HOST**.
 
 4. Migração do banco
 Acesse o container da aplicação com o seguinte comando: ``` docker exec -it challenge-apache-picpay bash ```.
