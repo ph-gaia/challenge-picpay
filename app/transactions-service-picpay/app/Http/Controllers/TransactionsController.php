@@ -14,11 +14,11 @@ class TransactionsController extends Controller
     private $connection;
     private $channel;
 
-    private $host = "chimpanzee.rmq.cloudamqp.com";
+    private $host = "192.168.0.7";
     private $port = 5672;
-    private $user = "ldqoqigt";
-    private $password = "sQcB6mPNv0qsLdDQg4lQF7U3LL9TnI0K";
-    private $vhost = "ldqoqigt";
+    private $user = "guest";
+    private $password = "guest";
+    private $vhost = "/";
 
     const base_url = "notification-service-picpay/public/";
 

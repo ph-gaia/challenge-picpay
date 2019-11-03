@@ -3,6 +3,7 @@ services:
   # Server messaging broker
   rabbitmq:
     image: rabbitmq:3-management
+    container_name: challenge-rabbitmq-picpay
     hostname: rabbit1
     ports: 
       - "15672:15672" # web ui
