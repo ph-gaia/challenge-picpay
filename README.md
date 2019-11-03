@@ -7,7 +7,7 @@
 ### Solução
 - Banco de dados:
 Iniciei a solução definindo o banco de dados e escolhi o MySQL 5.7, então passei para a modelagem do banco, segue abaixo o MER da solução:
-
+![alt text](https://github.com/ph-gaia/challenge-picpay/blob/master/MER-Challenge-PicPay.png)
 
 - Arquitetura:
 A solução foi desenvolvida baseado em micro serviços, a solução apresenta uma API gateway que recebe todas as requisições e controlando o acesso, alimentando a comunidade de serviços.
