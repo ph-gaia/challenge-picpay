@@ -55,7 +55,7 @@ O valor que deve ser alterado é `DB_HOST`. Você deve colocar o seu endereço I
  - DB_DATABASE=challenge_veus
  - DB_USERNAME=root
  - DB_PASSWORD=root
-Você deve também acessar o arquivo /app/Config/Configuration.php e atualizar o endereço ip na constante **BASE_HOST**.
+Você deve também acessar o arquivo /app/Config/Configuration.php e atualizar o endereço IP na constante **BASE_HOST**. Você também deve fazer isso **em todos os serviços**.
 
 4. Migração do banco
 Acesse o container da aplicação com o seguinte comando: ``` docker exec -it challenge-apache-picpay bash ```.
@@ -69,7 +69,13 @@ $ php artisan migrate
 ```
 Esse comando irá executar todos os arquivos de migração da aplicação e todas as tabelas do banco estarão disponíveis para ser utilizadas.
 
-4. Atualização
+5. Você precisa iniciar o serviço para ouvir os eventos na fila. Execute o seguinte comando:
+``` curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET http://SEU-IP:4000/transactions-service-picpay/public/api/transaction ```
+
+#### Utilização
+[Rotas Usuários]
+
+[Rotas Transações]
 
 #### Créditos
 Esta aplicação foi desenvolvida por [Paulo Henrique Coelho Gaia](mailto:phcgaia11@yahoo.com.br).
