@@ -8,13 +8,14 @@ use PhpAmqpLib\Message\AMQPMessage;
 use Illuminate\Support\Facades\Log;
 use App\Models\Transactions;
 use App\Helpers\MessageBrokerHttp;
+use App\Config\Configuration as cfg;
 
 class TransactionsController extends Controller
 {
     private $connection;
     private $channel;
 
-    private $host = "192.168.0.7";
+    private $host = cfg::BASE_HOST;
     private $port = 5672;
     private $user = "guest";
     private $password = "guest";

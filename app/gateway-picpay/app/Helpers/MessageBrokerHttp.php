@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use App\Config\Configuration as cfg;
+
 class MessageBrokerHttp
 {
 
@@ -15,7 +17,7 @@ class MessageBrokerHttp
      */
     public function execRequest($method, $url, $data, $header = null)
     {
-        $baseUrl = "http://192.168.0.7:4000/" . $url;
+        $baseUrl = "http://" . cfg::HOST_DEV . $url;
 
         $curl = curl_init($baseUrl);
 

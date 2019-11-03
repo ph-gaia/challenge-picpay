@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+use App\Config\Configuration as cfg;
 
 class MessageBrokerAmqp
 {
@@ -12,7 +13,7 @@ class MessageBrokerAmqp
     private $response;
     private $corr_id;
 
-    private $host = "192.168.0.7";
+    private $host = cfg::BASE_HOST;
     private $port = 5672;
     private $user = "guest";
     private $password = "guest";

@@ -9,7 +9,7 @@ use App\Helpers\MessageBrokerHttp;
 class UsersController extends Controller
 {
 
-    const base_url = "user-service-picpay/public/api/";
+    const base_url = "/user-service-picpay/public/api/";
 
     /**
      * @param Request $request
