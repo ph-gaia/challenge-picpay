@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Helpers\MessageBroker;
+use App\Helpers\MessageBrokerAmqp;
 
 class TransactionsController extends Controller
 {
@@ -21,9 +21,15 @@ class TransactionsController extends Controller
             "value" => $request->get('value')
         ];
 
-        $rabbit = new MessageBroker();
+        $rabbit = new MessageBrokerAmqp();
         $result = $rabbit->SendAndListen("transaction", $data);
 
-        return response($result);
+        $result = json_decode($result);
+        $response = [
+            "status" => $result->status,
+            "message" => $result->message
+        ];
+
+        return response($response, $result->code);
     }
 }

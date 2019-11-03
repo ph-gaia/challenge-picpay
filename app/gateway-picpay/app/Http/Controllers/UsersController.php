@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Helpers\MessageBroker;
-
+use App\Helpers\MessageBrokerHttp;
 
 class UsersController extends Controller
 {
+
+    const base_url = "user-service-picpay/public/api/";
 
     /**
      * @param Request $request
@@ -16,19 +17,16 @@ class UsersController extends Controller
      */
     public function findByNameOrUsername(Request $request)
     {
-        $rabbit = new MessageBroker();
+        $http = new MessageBrokerHttp();
 
-        $data = [
-            "query" => $request->get('q'),
-        ];
-
-        if (!$data['query']) {
-            $result = $rabbit->SendAndListen("users.findall", []);
-        } else {
-            $result = $rabbit->SendAndListen("users.findname", $data);
+        $data = "";
+        if ($request->has('q')) {
+            $data = "?query=" . $request->get('q');
         }
 
-        return response($result)->header('Content-Type', 'application/json');
+        $result = $http->execRequest('GET', self::base_url . "users" . $data, []);
+
+        return response($result['data'], $result['status'])->header('Content-Type', 'application/json');
     }
 
     /**
@@ -37,14 +35,11 @@ class UsersController extends Controller
      */
     public function findById(int $id)
     {
-        $data = [
-            "query" => $id,
-        ];
+        $http = new MessageBrokerHttp();
 
-        $rabbit = new MessageBroker();
-        $result = $rabbit->SendAndListen("users.find", $data);
+        $result = $http->execRequest('GET', self::base_url . "users/" . $id, []);
 
-        return response($result)->header('Content-Type', 'application/json');
+        return response($result['data'], $result['status'])->header('Content-Type', 'application/json');
     }
 
     /**
@@ -66,10 +61,10 @@ class UsersController extends Controller
             "cnpj" => $request->get('cnpj')
         ];
 
-        $rabbit = new MessageBroker();
-        $result = $rabbit->SendAndListen("users.register", $data);
+        $http = new MessageBrokerHttp();
+        $result = $http->execRequest('POST', self::base_url . "users", $data);
 
-        return response($result)->header('Content-Type', 'application/json');
+        return response($result['data'], $result['status'])->header('Content-Type', 'application/json');
     }
 
     /**
@@ -80,7 +75,6 @@ class UsersController extends Controller
     public function update(Request $request, int $id)
     {
         $data = [
-            "id" => $id,
             "name" => $request->get('name'),
             "cpf" => $request->get('cpf'),
             "email" => $request->get('email'),
@@ -93,10 +87,10 @@ class UsersController extends Controller
             "cnpj" => $request->get('cnpj')
         ];
 
-        $rabbit = new MessageBroker();
-        $result = $rabbit->SendAndListen("users.update", $data);
+        $http = new MessageBrokerHttp();
+        $result = $http->execRequest('PUT', self::base_url . "users/" . $id, $data);
 
-        return response($result)->header('Content-Type', 'application/json');
+        return response($result['data'], $result['status'])->header('Content-Type', 'application/json');
     }
 
     /**     
@@ -105,14 +99,10 @@ class UsersController extends Controller
      */
     public function destroy($id)
     {
-        $data = [
-            "query" => $id
-        ];
+        $http = new MessageBrokerHttp();
+        $result = $http->execRequest('DELETE', self::base_url . "users/" . $id, []);
 
-        $rabbit = new MessageBroker();
-        $result = $rabbit->SendAndListen("users.delete", $data);
-
-        return response($result)->header('Content-Type', 'application/json');
+        return response($result['data'], $result['status'])->header('Content-Type', 'application/json');
     }
 
     /**
@@ -127,7 +117,9 @@ class UsersController extends Controller
             "password" => $data->password
         ];
 
-        $rabbitmq = new MessageBroker();
-        return $rabbitmq->SendAndListen("auth", $data)->header('Content-Type', 'application/json');
+        $http = new MessageBrokerHttp();
+        $result = $http->execRequest('POST', self::base_url . "login", $data);
+
+        return response($result['data'], $result['status'])->header('Content-Type', 'application/json');
     }
 }

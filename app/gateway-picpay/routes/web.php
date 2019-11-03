@@ -12,20 +12,23 @@
 */
 
 $router->get('/', function () use ($router) {
-    return "Welcome to the Picpay Test. =)";
+    return "Welcome to the Picpay Test. =) <br> :: API Gateway ::";
 });
 
 $router->group(['prefix' => 'api', 'middleware' => ['cors']], function () use ($router) {
 
     $router->post('login',  ['uses' => 'UsersController@login']);
 
+    $router->post('users', ['uses' => 'UsersController@create']);
+});
+
+$router->group(['prefix' => 'api', 'middleware' => ['cors', 'auth']], function () use ($router) {
+
     $router->post('transactions', ['uses' => 'TransactionsController@create']);
 
     $router->get('users/{id}', ['uses' => 'UsersController@findById']);
 
     $router->get('users',  ['uses' => 'UsersController@findByNameOrUsername']);
-
-    $router->post('users', ['uses' => 'UsersController@create']);
 
     $router->put('users/{id}', ['uses' => 'UsersController@update']);
 

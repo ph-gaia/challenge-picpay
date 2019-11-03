@@ -4,19 +4,20 @@ namespace App\Helpers;
 
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
-use Illuminate\Support\Facades\Log;
 
-class MessageBroker
+class MessageBrokerAmqp
 {
     private $connection;
     private $channel;
     private $response;
     private $corr_id;
+
     private $host = "chimpanzee.rmq.cloudamqp.com";
     private $port = 5672;
     private $user = "ldqoqigt";
     private $password = "sQcB6mPNv0qsLdDQg4lQF7U3LL9TnI0K";
     private $vhost = "ldqoqigt";
+
     private function connect()
     {
         try {
@@ -31,6 +32,7 @@ class MessageBroker
         $this->channel->close();
         $this->connection->close();
     }
+
     /**
      * Method responsible only for sending a message
      *
@@ -62,6 +64,7 @@ class MessageBroker
         );
         $this->closeConnection();
     }
+
     /**
      * Method responsible for listening to events and processing
      *
@@ -71,6 +74,7 @@ class MessageBroker
     public function listen($queue, $callback)
     {
         $this->connect();
+
         $this->channel->queue_declare(
             $queue,                 #queue - Queue names may be up to 255 bytes of UTF-8 characters
             false,                  #passive - can use this to check whether an exchange exists without modifying the server state
@@ -78,11 +82,13 @@ class MessageBroker
             false,                  #exclusive - used by only one connection and the queue will be deleted when that connection closes
             false                   #auto delete - queue is deleted when last consumer unsubscribes
         );
+
         $this->channel->basic_qos(
             null,                   #prefetch size - prefetch window size in octets, null meaning "no specific limit"
             1,                      #prefetch count - prefetch window in terms of whole messages
             null                    #global - global=null to mean that the QoS settings should apply per-consumer, global=true to mean that the QoS settings should apply per-channel
         );
+
         $this->channel->basic_consume(
             $queue,                 #queue
             '',                     #consumer tag - Identifier for the consumer, valid within the current channel. just string
@@ -92,12 +98,15 @@ class MessageBroker
             false,                  #no wait - TRUE: the server will not respond to the method. The client should not wait for a reply method
             array($this, $callback) #callback
         );
+
         while (count($this->channel->callbacks)) {
             $this->log->addInfo('Waiting for messages');
             $this->channel->wait();
         }
+
         $this->closeConnection();
     }
+
     /**
      * Method responsible for sending a message and receiving a return
      * Remote Procedure Call - RPC
@@ -105,6 +114,7 @@ class MessageBroker
     public function SendAndListen($queue, $message, $callback = 'onResponse')
     {
         $this->connect();
+
         list($callback_queue,,) = $this->channel->queue_declare(
             "",         #queue
             false,      #passive
@@ -112,6 +122,7 @@ class MessageBroker
             true,       #exclusive
             false       #auto delete
         );
+
         $this->channel->basic_consume(
             $callback_queue,                #queue
             '',                             #consumer tag
@@ -121,6 +132,7 @@ class MessageBroker
             false,                          #no wait
             array($this, $callback)         #callback
         );
+
         $this->response = null;
         $this->corr_id = uniqid();
         $data = json_encode($message);
@@ -128,18 +140,22 @@ class MessageBroker
             $data,
             array('correlation_id' => $this->corr_id, 'reply_to' => $callback_queue)
         );
+
         $this->channel->basic_publish(
             $msg,           #message
             '',             #exchange
             $queue          #routing key
         );
+
         while (!$this->response) {
             $this->channel->wait();
         }
+
         $this->closeConnection();
-        Log::info(json_encode($this->response));
+
         return $this->response;
     }
+
     /**
      * @param AMQPMessage $rep
      */
@@ -149,9 +165,11 @@ class MessageBroker
             $this->response = $rep->body;
         }
     }
+
     public function ListenAndSend($queue, $callback = 'callback')
     {
         $this->connect();
+
         $this->channel->queue_declare(
             $queue,         #queue 
             false,          #passive
@@ -159,11 +177,13 @@ class MessageBroker
             false,          #exclusive
             false           #autodelete
         );
+
         $this->channel->basic_qos(
             null,   #prefetch size
             1,      #prefetch count
             null    #global
         );
+
         $this->channel->basic_consume(
             $queue,                     #queue
             '',                         #consumer tag
@@ -173,11 +193,14 @@ class MessageBroker
             false,                      #no wait
             array($this, $callback)     #callback
         );
+
         while (count($this->channel->callbacks)) {
             $this->channel->wait();
         }
+
         $this->closeConnection();
     }
+
     /**
      * Executes when a message is received.
      *
@@ -186,20 +209,25 @@ class MessageBroker
     public function callback(AMQPMessage $req)
     {
         $credentials = json_decode($req->body);
+
         $authResult = $this->auth($credentials);
+
         $msg = new AMQPMessage(
             json_encode($authResult),
             array('correlation_id' => $req->get('correlation_id'))  #options
         );
+
         $req->delivery_info['channel']->basic_publish(
             $msg,                   #message
             '',                     #exchange
             $req->get('reply_to')   #routing key
         );
+
         $req->delivery_info['channel']->basic_ack(
             $req->delivery_info['delivery_tag'] #delivery tag
         );
     }
+
     /**
      * @param \stdClass $credentials
      * @return bool

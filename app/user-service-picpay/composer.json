@@ -9,7 +9,7 @@
         "laravel/lumen-framework": "5.8.*",
         "firebase/php-jwt": "v5.0.0",
         "justinrainbow/json-schema": "5.2.6",
-        "php-amqplib/php-amqplib": ">=2.6.1"
+        "php-amqplib/php-amqplib": "^2.10"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",

@@ -12,7 +12,7 @@
 */
 
 $router->get('/', function () use ($router) {
-    return $router->app->version();
+    return "Welcome to the Picpay Test. =) <br> Microservice transactions!";
 });
 
 $router->get('/transaction', ['uses' => 'TransactionsController@payments']);

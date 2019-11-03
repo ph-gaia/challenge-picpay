@@ -7,6 +7,7 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use Illuminate\Support\Facades\Log;
 use App\Models\Transactions;
+use App\Helpers\MessageBrokerHttp;
 
 class TransactionsController extends Controller
 {
@@ -18,6 +19,8 @@ class TransactionsController extends Controller
     private $user = "ldqoqigt";
     private $password = "sQcB6mPNv0qsLdDQg4lQF7U3LL9TnI0K";
     private $vhost = "ldqoqigt";
+
+    const base_url = "notification-service-picpay/public/";
 
     public function connect()
     {
@@ -99,10 +102,10 @@ class TransactionsController extends Controller
     private function processTransaction(\stdClass $object)
     {
         $valid = $this->validateTransaction($object->value);
-        Log::info($object->value);
 
         if (!$valid) {
             return [
+                "code" => 400,
                 "status" => "Unauthorized Transaction",
                 "message" => "Transactions whose value is greater than or equal to R$ 100.00"
             ];
@@ -110,7 +113,10 @@ class TransactionsController extends Controller
 
         $this->registerTransactions($object);
 
+        $this->sendEmail($object);
+
         return [
+            "code" => 200,
             "status" => "Authorized Transaction",
             "message" => "Transaction was successful"
         ];
@@ -126,11 +132,29 @@ class TransactionsController extends Controller
 
     private function registerTransactions($object)
     {
-        $model = new Transactions();
-        $model->payee_id = $object->payee;
-        $model->payer_id = $object->payer;
-        $model->transaction_date = $object->transactionDate;
-        $model->value = $object->value;
-        $model->save();
+        $result = Transactions::create([
+            "payee_id" => $object->payee,
+            "payer_id" => $object->payer,
+            "transaction_date" => $object->transactionDate,
+            "value" => $object->value
+        ]);
+
+        if (!$result) {
+            return false;
+        }
+        return true;
+    }
+
+    private function sendEmail($data)
+    {
+        $datas = [
+            "payer" => $data->payer,
+            "payee" => $data->payee,
+            "email" => "teste@picppay.com.br",
+            "value" => $data->value
+        ];
+
+        $http = new MessageBrokerHttp();
+        $http->execRequest('POST', self::base_url . "email/transaction", $datas);
     }
 }
