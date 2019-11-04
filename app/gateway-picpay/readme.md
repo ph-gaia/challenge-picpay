@@ -9,24 +9,30 @@ Em todas as rotas de listagem de registros o padrão de resposta poder ser notad
 
 ```javascript
 {
-    "message": "",
-    "status": "success",
-    "data": [
-        {
-            "id": 1,
-            "name": "Paulo Henrique",
-            "mail" : "teste@teste.com.br",
-            "phone" : "91990012012",
-            "type_account" : "CUSTOMER"
-        },
-        {
-            "id": 2,
-            "name": "Paulo Victor",
-            "mail" : "teste@teste.com.br",
-            "phone" : "91990012012",
-            "type_account" : "CUSTOMER"
-        }
-    ]
+  "status": "success",
+  "message": "",
+  "data": [
+    {
+      "id": 1,
+      "full_name": "Paulo Henrique Gaia",
+      "cpf": "01134669275",
+      "phone_number": "91992854548",
+      "email": "phcgaia11@yahoo.com.br",
+      "account_type": "CONSUMER",
+      "created_at": "2019-11-01 23:42:45",
+      "updated_at": "2019-11-01 23:42:45"
+    },
+    {
+      "id": 2,
+      "full_name": "Paulo Victor Coelho Gaia",
+      "cpf": "01134694202",
+      "phone_number": "91989939010",
+      "email": "pvcgaia@yahoo.com.br",
+      "account_type": "CONSUMER",
+      "created_at": "2019-11-01 23:43:52",
+      "updated_at": "2019-11-01 23:43:52"
+    }
+  ]
 }
 ```
 
@@ -58,12 +64,30 @@ Em todas as rotas de listagem de registros o padrão de resposta poder ser notad
 
 ```javascript
 {
-    "message": "",
-    "status": "success",
-    "data": [{
-        "id": 1,
-        "name": "Paulo Henrique Gaia"
-    }]
+  "status": "success",
+  "message": "",
+  "data": [
+    {
+      "id": 1,
+      "full_name": "Paulo Henrique Gaia",
+      "cpf": "01134669275",
+      "phone_number": "91992854548",
+      "email": "phcgaia11@yahoo.com.br",
+      "account_type": "CONSUMER",
+      "created_at": "2019-11-01 23:42:45",
+      "updated_at": "2019-11-01 23:42:45"
+    },
+    {
+      "id": 2,
+      "full_name": "Paulo Victor Coelho Gaia",
+      "cpf": "01134694202",
+      "phone_number": "91989939010",
+      "email": "pvcgaia@yahoo.com.br",
+      "account_type": "CONSUMER",
+      "created_at": "2019-11-01 23:43:52",
+      "updated_at": "2019-11-01 23:43:52"
+    }
+  ]
 }
 ```
 
@@ -82,12 +106,18 @@ Em todas as rotas de listagem de registros o padrão de resposta poder ser notad
 
 ```javascript
 {
-    "message": "",
-    "status": "success",
-    "data": {
-        "id": 1,
-        "name": "Paulo Henrique Gaia"
-    }
+  "status": "success",
+  "message": "",
+  "data": {
+    "id": 1,
+    "full_name": "Paulo Henrique Gaia",
+    "cpf": "01134669275",
+    "phone_number": "91992854548",
+    "email": "phcgaia11@yahoo.com.br",
+    "account_type": "CONSUMER",
+    "created_at": "2019-11-01 23:42:45",
+    "updated_at": "2019-11-01 23:42:45"
+  }
 }
 ```
 
@@ -96,7 +126,8 @@ Em todas as rotas de listagem de registros o padrão de resposta poder ser notad
 ```javascript
 {
     "message": "User not found",
-    "status": "error"
+    "status": "error",
+    "data": []
 }
 ```
 ---
@@ -112,12 +143,13 @@ Em todas as rotas de listagem de registros o padrão de resposta poder ser notad
 
 ```javascript
 {
-    "message": "Registry created successfully",
-    "status": "success",
-    "data": {
-        "id": 2,
-        "name": "Paulo Henrique"
-    }
+	"name": "Juan Leonardo Hugo Baptista",
+	"cpf" : "75436525792",
+	"phone" : "91313766289",
+	"email" : "jjuanleonardohugobaptista@tcotecnologia.com.br",
+	"typeAccount" : "CUSTOMER",
+	"username" : "juan.batista",
+	"password" : "MYjnwNJCt6"
 }
 ```
 
@@ -159,6 +191,12 @@ Em todas as rotas de listagem de registros o padrão de resposta poder ser notad
     "data": {
         "id": 2,
         "name": "Paulo Henrique",
+        "cpf": "01134669275",
+        "phone_number": "91992854548",
+        "email": "phcgaia11@yahoo.com.br",
+        "account_type": "CONSUMER",
+        "created_at": "2019-11-01 23:42:45",
+        "updated_at": "2019-11-01 23:42:45"
     }
 }
 ```
@@ -167,7 +205,7 @@ Em todas as rotas de listagem de registros o padrão de resposta poder ser notad
 
 ```javascript
 {
-    "message": "Register not found",
+    "message": "User not found",
     "status": "error"
 }
 ```
