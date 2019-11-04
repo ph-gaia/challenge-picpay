@@ -21,7 +21,7 @@ class TransactionsController extends Controller
     private $password = "guest";
     private $vhost = "/";
 
-    const base_url = "notification-service-picpay/public/";
+    const base_url = "/notification-service-picpay/public/";
 
     public function connect()
     {

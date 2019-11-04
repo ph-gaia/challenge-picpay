@@ -32,5 +32,5 @@ $router->group(['prefix' => 'api', 'middleware' => ['cors', 'auth']], function (
 
     $router->put('users/{id}', ['uses' => 'UsersController@update']);
 
-    $router->delete('users/{id}', ['uses' => 'UsersController@destroy']);
+    $router->delete('users/{id}', ['uses' => 'UsersController@delete']);
 });

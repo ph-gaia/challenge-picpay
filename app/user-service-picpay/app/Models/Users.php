@@ -147,9 +147,7 @@ class Users extends Model
      */
     public function edit(Request $request, $id)
     {
-        $data = $request->all();
-
-        return response($data);
+        $data = (object) $request->all();
 
         if (!FunctionsModel::inputValidate($data, 'users_schema.json')) {
             return response([
@@ -176,13 +174,6 @@ class Users extends Model
             $user->email = $data->email;
 
             $user->save();
-
-            if ($user->type_account == 'SELLER' && $data->socialName || $data->fantasyName) {
-                $seller = Seller::where('users_id', $id)->first();
-                $seller->social_name = $data->socialName;
-                $seller->fantasy_name = $data->fantasyName;
-                $seller->save();
-            }
 
             return response([
                 "message" => "Registry updated successfully",

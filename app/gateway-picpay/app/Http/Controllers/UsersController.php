@@ -97,7 +97,7 @@ class UsersController extends Controller
      * @param $id object identifier
      * @return Response
      */
-    public function destroy($id)
+    public function delete($id)
     {
         $http = new MessageBrokerHttp();
         $result = $http->execRequest('DELETE', self::base_url . "users/" . $id, []);

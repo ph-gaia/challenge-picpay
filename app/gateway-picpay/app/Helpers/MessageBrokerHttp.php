@@ -43,8 +43,8 @@ class MessageBrokerHttp
                 curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
                 break;
             case "DELETE":
-                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "DELETE");
                 curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "DELETE");
                 break;
         }
 
